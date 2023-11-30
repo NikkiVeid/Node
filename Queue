@@ -1,0 +1,124 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct Queue {
+    struct Cell* stack_1;
+    struct Cell* stack_2;
+};
+
+typedef int Data;
+struct Cell {
+    Data node;
+    struct Cell* next;
+};
+
+struct Cell* Ctor() {
+    struct Cell* head = (struct Cell*) calloc(1, sizeof(struct Cell));
+    head->node = NULL;
+    head->next = NULL;
+
+    return head;
+}
+
+struct Cell* Dtor(struct Queue* queue) {
+    free(queue->stack_1);
+    free(queue->stack_2);
+    free(queue);
+}
+
+void Push (Data elem, struct Cell* head) {
+
+    struct Cell* new_el = (struct Cell*) calloc(1, sizeof(struct Cell));
+    new_el->node = elem;
+    struct Cell* tmp = (struct Cell*) calloc(1, sizeof(struct Cell));
+
+    tmp->node = head->node;
+    head->node = new_el->node;
+    new_el->node = tmp->node;
+
+    tmp->next = new_el;
+    new_el->next = head->next;
+    head->next = tmp->next;
+
+    free(tmp);
+
+}
+
+void Pop(struct Cell* head) {
+
+    struct Cell* new_el = head->next;
+    struct Cell* tmp = (struct Cell*) calloc(1, sizeof(struct Cell));
+
+    tmp->node = head->node;
+    head->node = new_el->node;
+    new_el->node= tmp->node;
+
+    tmp->next = new_el->next;
+    new_el->next = head->next;
+    head->next = tmp->next;
+
+    free(tmp);
+    free(new_el);
+
+}
+Data Back(struct Cell* head) {
+    return head->node;
+}
+
+struct Queue* Queue_Ctor() {
+    struct Queue* queue = (struct Queue*) calloc(1, sizeof(struct Queue));
+    queue->stack_1 = Ctor();
+    queue->stack_2 = Ctor();
+
+    return queue;
+}
+
+struct Cell* Queue_Dtor(struct Queue* queue) {
+    free(queue->stack_1);
+    free(queue->stack_2);
+    free(queue);
+}
+
+void PushQueue(struct Queue* queue, Data value) {
+    Push(value, queue->stack_1);
+}
+
+Data PopQueue(struct Queue* queue) {
+    if ((queue->stack_2)->next != NULL) {
+        Data node = Back(queue->stack_2);
+        Pop(queue->stack_2);
+        return node;
+    }
+
+    while ((queue->stack_1)->next != NULL) {
+        Push((queue->stack_1)->node, queue->stack_2);
+        Pop(queue->stack_1);
+    }
+
+    if ((queue->stack_2)->next != NULL) {
+        Data node = Back(queue->stack_2);
+        Pop(queue->stack_2);
+        return node;
+    }
+
+    return NULL;
+}
+
+Data BackQueue(struct Queue* queue) {
+    if ((queue->stack_2)->next != NULL) {
+        Data node = Back(queue->stack_2);
+        return node;
+    }
+
+    while ((queue->stack_1)->next != NULL) {
+        Push((queue->stack_1)->node, queue->stack_2);
+        Pop(queue->stack_1);
+    }
+
+    if ((queue->stack_2)->next != NULL) {
+        Data node = Back(queue->stack_2);
+        return node;
+    }
+
+    return NULL;
+}
